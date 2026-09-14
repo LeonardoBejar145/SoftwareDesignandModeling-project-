@@ -1,0 +1,110 @@
+USER STORIES
+
+US-S-01: As a registered user, I want to upload my notes, so that I can share my point of view on certain topics.
+
+US-S-02: As a user, I want to search for posts using specific tags/topics, so that I can quickly find relevant content without scrolling through the entire library.
+
+US-S-03: As a user, I want to download selected posts, so that I can access the content offline or keep a local copy for my personal use.
+
+US-S-04: As a user, I want to rate posts, so that I can provide feedback and help other users identify high-quality content.
+
+US-S-05: As a user, I want to access the main content library, so that I can browse, search, and manage my interactions with all available posts.
+
+US-A-01: As an administrator, I want to create new tags, so that I can properly categorize new posts and maintain an organized library.
+
+US-A-02: As an administrator, I want to review new posts, so that I can ensure the content doesn’t break community guidelines before it is made publicly available in the library.
+
+US-A-03: As an administrator, I want to ban a user who breaks the TOS, so that I can prevent them from causing further harm or disruption to the platform.
+
+US-A-04: As an administrator, I want to unban a user after a successful appeal, so that I can restore their account access if they have shown they are willing to follow the rules again or there was a mistake in the ban reason.
+
+US-A-05: As an administrator, I want to accept or deny new user registrations, so that I can control who joins the platform and maintain a secure environment.
+
+US-U-01: As a User, I want to log into the platform securely, so that I can access the application’s library and functions .
+
+US-S-00 means its a user story from a student perspective
+US-A-00 means its a user story from an adminstrator perspective
+US-U-00 means its a user story from a universal (affects everyone) perspective
+
+================================================================================================================
+
+FUNCTIONAL REQUIREMENTS
+
+FR-01: Upload Post
+User story: US-S-01
+Acceptance Criteria: 
+The upload form must validate all required fields before submission. If invalid, an error message is displayed.
+If the file is over 10MB, the system must automatically compress and resize the file before uploading.
+Upon successful upload, the post must be added to the library, and the user should receive a success notification.
+
+FR-02: Search Topics
+User story: US-S-02
+Acceptance Criteria: 
+The search bar must allow input of tags.
+The system must validate the tag. If the tag does not exist, an error message is displayed.
+If the tag is valid, the system displays a list of all posts associated with that tag.
+
+FR-03: Download Posts
+User story: US-S-03.
+Acceptance Criteria: 
+The user must select a valid post first.
+The download action must trigger a standard file download to the user's device.
+
+FR-04: Rate Posts
+User story: US-S-04
+Acceptance Criteria: 
+The user must select a valid post first.
+The system must allow the user to submit a rating
+The rating must be saved to the database and reflected in the post's average score.
+
+FR-05: Access Library
+User story: US-S-05
+Acceptance Criteria: 
+The user must be successfully authenticated (logged in) to access the library.
+Once accessed, the user must be presented with the available actions (Search, Select, Rate, Download).
+
+FR-06: Create Tag
+User story: US-A-01
+Acceptance Criteria: 
+The Admin enters a new tag name.
+The system checks if the tag already exists.
+If it does exist, an error code is displayed.
+If it does not exist, the new tag is saved to the database.
+
+FR-07: Review Posts
+User story: US-A-02
+Acceptance Criteria: 
+The Admin reviews the content of a newly uploaded post.
+The Admin chooses to "Accept" or "Deny". 
+If accepted, the post is sent to the library.
+If denied, the post is marked as "Post denied" and is not visible to standard users.
+
+FR-08: Ban User
+User story: US-A-03
+Acceptance Criteria: 
+The Admin investigates a "Problem with User" report.
+The Admin confirms the user violated the TOS.
+The system flags the user as "Banned".
+The database is updated, and the user immediately loses access to the platform.
+
+FR-09: Unban User
+User story: US-A-04
+Acceptance Criteria: 
+The Admin reviews a "Ban Appeal" from a banned user.
+The Admin confirms the appeal is valid.
+The system flags the user as "Unbanned".
+The database is updated, and the user's access is restored.
+
+FR-10: Approve New Accounts
+User story: US-A-05
+Acceptance Criteria: 
+The Admin reviews a pending "New Account" request.
+If the account is accepted, the user is added to the database.
+If the account is denied, the user receives a "User denied" notification and is not granted access.
+
+FR-11: User Authentication
+User story: US-U-01
+Acceptance Criteria: 
+The system must validate user credentials (username and password).
+If authentication succeeds, the user is granted access to the main library.
+If authentication fails, the user is denied access and an error message is displayed.
