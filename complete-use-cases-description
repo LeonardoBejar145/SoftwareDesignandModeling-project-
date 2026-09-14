@@ -1,0 +1,291 @@
+
+UC-01: User Authentication	
+Use Case ID: UC-01
+Use Case Name: User Authentication
+Actor(s): User, Administrator
+Description: The user logs into the platform to gain access to the library and system functions.
+Preconditions: The user has a registered account in the system.
+Trigger: The user navigates to the login page and submits their credentials.
+Main Flow
+1. The user enters their username and password.
+2. The system validates the credentials against the database.
+3. The system grants access to the main library.
+4. The use case ends successfully.
+Alternative Flow
+2a. Invalid Credentials:
+1. The system determines the credentials do not match any record.
+2. The system denies access and displays an error message.
+3. The use case ends in failure.
+Postconditions: The user is authenticated and granted access to the platform.
+Criteria
+- The system must validate user credentials (username and password).
+- If authentication succeeds, the user is granted access to the main library.
+- If authentication fails, the user is denied access and an error message is displayed.
+Source Requirement: FR-11
+
+UC-02: Upload Post
+Use Case ID: UC-02
+Use Case Name: Upload Post
+Actor(s): User
+Description: The user uploads academic notes or study materials to share with the community.
+Preconditions: The student is authenticated (UC-01) and has accessed the upload interface.
+Trigger: The student initiates the upload process.
+Main Flow
+1. The student selects a file and fills in the required metadata.
+2. The system validates all required form fields.
+3. The system checks the file size.
+4. If the file is under 10MB, proceed to step 6.
+5. If the file exceeds 10MB, the system compresses and resizes the file.
+6. The student assigns a valid tag to the post.
+7. The system uploads the post to the library.
+8. The system displays a success notification.
+9. The use case ends successfully.
+Alternative Flow
+2a. Invalid Form Data:
+1. The system detects missing or invalid fields.
+2. The system displays an error message.
+3. The use case ends in failure.
+5a. Compression Failure:
+1. The system cannot reduce the file below 10MB.
+2. The system displays an error code.
+3. The use case ends in failure.
+6a. Invalid Tag:
+1. The system determines the tag does not exist.
+2. The system displays an error code.
+3. The use case ends in failure.
+Postconditions: The post is uploaded and marked as "Pending Review" in the database.
+Criteria
+- The upload form must validate all required fields before submission. If invalid, an error message is displayed.
+- If the file is over 10MB, the system must automatically compress and resize the file before uploading.
+- The user must assign a valid tag before the post can be uploaded.
+- Upon successful upload, the post must be added to the library, and the user should receive a success notification.
+Source Requirement: FR-01
+
+
+UC-03: Search by Tag
+Use Case ID: UC-03
+Use Case Name: Search by Tag
+Actor(s): User
+Description: The user searches for posts using specific tags to find relevant content.
+Preconditions: The user is authenticated (UC-01) and has accessed the library.
+Trigger: The user enters a tag into the search bar.
+Main Flow
+1. The user enters a tag into the search bar.
+2. The system validates the tag against the database.
+3. The system retrieves all published posts associated with the tag.
+4. The system displays the list of matching posts.
+5. The use case ends successfully.
+Alternative Flow
+2a. Invalid Tag:
+1. The system determines the tag does not exist.
+2. The system displays an error message.
+3. The use case ends in failure.
+Postconditions: The user is presented with a filtered list of posts matching the search criteria.
+Criteria
+- The search bar must allow input of tags.
+- The system must validate the tag. If the tag does not exist, an error message is displayed.
+- If the tag is valid, the system displays a list of all posts associated with that tag.
+Source Requirement: FR-02
+
+
+UC-04: Download Post	
+Use Case ID: UC-04
+Use Case Name: Download Post
+Actor(s): User
+Description: The user downloads a selected post for offline access or personal use.
+Preconditions: The user is authenticated (UC-01) and has selected a valid post from the library.
+Trigger: The user initiates the download action.
+Main Flow
+1. The user selects a post.
+2. The user initiates the download.
+3. The system triggers a standard file download to the user's device.
+4. The use case ends successfully.
+Alternative Flow: none
+Postconditions: The selected file is downloaded to the user's local device.
+Criteria
+- The user must select a valid post first.
+- The download action must trigger a standard file download to the user's device.
+Source Requirement: FR-03
+
+
+UC-05: Rate Post	
+Use Case ID: UC-05
+Use Case Name: Rate Post
+Actor(s): User
+Description: The user submits a rating for a selected post to provide feedback.
+Preconditions: The user is authenticated (UC-01) and has selected a valid post.
+Trigger: The user submits a rating for the post.
+Main Flow
+1. The user selects a post.
+2. The user submits a numerical rating.
+3. The system saves the rating to the database.
+4. The system updates the post's average score.
+5. The use case ends successfully.
+Alternative Flow: none
+Postconditions: The rating is persisted, and the post's aggregate score is updated.
+Criteria
+- The user must select a valid post first.
+- The system must allow the user to submit a rating.
+- The rating must be saved to the database and reflected in the post's average score.
+Source Requirement: FR-04
+
+
+UC-06: Access Library	
+Use Case ID: UC-06
+Use Case Name: Access Library
+Actor(s): User
+Description: The user accesses the main content library to browse and interact with available posts.
+Preconditions: The user is authenticated (UC-01)
+Trigger: The user navigates to the library after logging in.
+Main Flow
+1. The user logs into the system.
+2. The system grants access to the main library.
+3. The user is presented with available actions (Search, Select, Rate, Download).
+4. The use case ends successfully.
+Alternative Flow
+1a. Authentication Failure:
+1. The student is not authenticated.
+2. Access to the library is denied.
+3. The use case ends in failure.
+Postconditions: The user has full access to the library's browsing and interaction features.
+Criteria
+- The user must be successfully authenticated (logged in) to access the library.
+- Once accessed, the user must be presented with the available actions (Search, Select, Rate, Download).
+Source Requirement: FR-05
+
+
+UC-07: Create Tag	
+Use Case ID: UC-07
+Use Case Name: Create Tag
+Actor(s): Administrator
+Description: The administrator creates a new tag to categorize posts within the library.
+Preconditions: The administrator is authenticated (UC-01) and has accessed the tag management interface.
+Trigger: The administrator initiates the tag creation process.
+Main Flow
+1. The administrator enters a new tag name.
+2. The system checks if the tag already exists in the database.
+3. If the tag does not exist, the system saves it to the database.
+4. The use case ends successfully.
+Alternative Flow
+2a. Duplicate Tag:
+1. The system determines the tag already exists.
+2. The system displays an error code.
+3. The use case ends in failure.
+Postconditions: The new tag is saved and available for post categorization.
+Criteria
+- The Admin enters a new tag name.
+- The system checks if the tag already exists.
+- If it does exist, an error code is displayed.
+- If it does not exist, the new tag is saved to the database.
+Source Requirement: FR-06
+
+
+UC-08: Review Post
+Use Case ID: UC-07
+Use Case Name: Review Post
+Actor(s): Administrator
+Description: The administrator reviews a newly uploaded post to ensure it complies with community guidelines before publication.
+Preconditions: The administrator is authenticated (UC-01) and there are posts pending review.
+Trigger: The administrator opens a pending post for review.
+Main Flow
+1. The administrator views the content of the pending post.
+2. The administrator chooses to "Accept" the post.
+3. The system sends the post to the library.
+4. The system updates the post status to "Published."
+5. The use case ends successfully.
+Alternative Flow
+2a. Post Denied:
+1. The administrator chooses to "Deny" the post.
+2. The system marks the post as "Post Denied."
+3. The post is not visible to standard users.
+4. The use case ends successfully (with denial).
+Postconditions: The post is either published to the library or denied and withheld
+Criteria
+- The Admin reviews the content of a newly uploaded post.
+- The Admin chooses to "Accept" or "Deny."
+- If accepted, the post is sent to the library.
+- If denied, the post is marked as "Post denied" and is not visible to standard users.
+Source Requirement: FR-07
+
+
+UC-09: Ban User	
+Use Case ID: UC-09
+Use Case Name: Ban User
+Actor(s): Administrator
+Description: The administrator bans a user who has violated the Terms of Service.
+Preconditions: The administrator is authenticated (UC-01) and has received a "Problem with User" report.
+Trigger: The administrator confirms a TOS violation and initiates the ban.
+Main Flow
+1. The administrator investigates the report.
+2. The administrator confirms the user violated the TOS.
+3. The administrator bans the user.
+4. The system flags the user as "Banned."
+5. The database is updated.
+6. The user immediately loses access to the platform.
+7. The use case ends successfully.
+Alternative Flow
+2a. No Violation Found:
+1. The administrator determines no violation occurred.
+2. The use case ends with no action taken.
+Postconditions: The user's status is updated to "Banned," and their access is revoked.
+Criteria
+- The Admin investigates a "Problem with User" report.
+- The Admin confirms the user violated the TOS.
+- The system flags the user as "Banned."
+- The database is updated, and the user immediately loses access to the platform.
+Source Requirement: FR-08
+
+
+UC-10: Unban User	
+Use Case ID: UC-10
+Use Case Name: Unban User
+Actor(s): Administrator
+Description: The administrator unbans a user following a successful appeal or if the ban was issued in error.
+Preconditions: The administrator is authenticated (UC-01) and has received a "Ban Appeal" from a banned user.
+Trigger: The administrator validates the appeal and initiates the unban.
+Main Flow
+1. The administrator reviews the ban appeal.
+2. The administrator confirms the appeal is valid.
+3. The administrator unbans the user.
+4. The system flags the user as "Active."
+5. The database is updated.
+6. The user's access is restored.
+7. The use case ends successfully.
+Alternative Flow
+2a. Appeal Invalid:
+1. The administrator determines the appeal is not valid.
+2. The use case ends, and the user remains banned.
+Postconditions: The user's status is updated to "Active," and their access is restored.
+Criteria
+- The Admin reviews a "Ban Appeal" from a banned user.
+- The Admin confirms the appeal is valid.
+- The system flags the user as "Unbanned."
+- The database is updated, and the user's access is restored.
+Source Requirement: FR-09
+
+
+UC-11: Approve New Account	
+Use Case ID: UC-11
+Use Case Name: Approve New Account
+Actor(s): Administrator
+Description: The administrator accepts or denies a new user registration request to control platform access.
+Preconditions: The administrator is authenticated (UC-01) and there are pending account requests.
+Trigger: The administrator opens a pending "New Account" request.
+Main Flow
+1. The administrator reviews the pending request.
+2. The administrator accepts the account.
+3. The system adds the user to the database with an "Active" status.
+4. The use case ends successfully.
+Alternative Flow
+2a. Account Denied:
+1. The administrator denies the account.
+2. The user receives a "User denied" notification.
+3. The user is not granted access.
+4. The use case ends successfully (with denial).
+Postconditions: The user account is either created and activated, or denied and not created.
+Criteria
+- The Admin reviews a pending "New Account" request.
+- If the account is accepted, the user is added to the database.
+- If the account is denied, the user receives a "User denied" notification and is not granted access.
+Source Requirement: FR-10
+
