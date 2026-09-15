@@ -1,14 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // --- SESSION LOGIC ---
+  // --- SESSION & BAN CHECK ---
   const userSession = JSON.parse(localStorage.getItem('currentUser'));
 
-  // Redirect to login if no active session
   if (!userSession) {
     window.location.href = 'login.html';
     return;
   }
 
-  // Display user info in UI
+  if (isUserBanned(userSession.username)) {
+    alert('❌ Your account has been banned.');
+    localStorage.removeItem('currentUser');
+    window.location.href = 'login.html';
+    return;
+  }
+
+  // Render User Interface Information
   const isProf = userSession.role === 'PROFESSOR';
   const roleLabel = isProf ? '👨‍🏫 Professor' : '👨‍🎓 Student';
   
@@ -17,17 +23,25 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('userRoleDisplay').textContent = roleLabel;
   document.getElementById('userAvatar').textContent = userSession.username.charAt(0);
   
-  if(isProf) {
+  if (isProf) {
     document.getElementById('userAvatar').className = "w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-lg uppercase";
+    
+    // Enable Professor Moderation Button
+    const modBtn = document.getElementById('modPanelBtn');
+    modBtn.classList.remove('hidden');
+    updateAppealBadge();
+
+    modBtn.addEventListener('click', openModerationModal);
+    document.getElementById('closeModModal').addEventListener('click', closeModerationModal);
   }
 
-  // Handle Logout
+  // Logout Action
   document.getElementById('logoutBtn').addEventListener('click', () => {
     localStorage.removeItem('currentUser');
     window.location.href = 'login.html';
   });
 
-  // --- YOUR EXISTING POST LOGIC ---
+  // --- POSTING LOGIC ---
   const noteForm = document.getElementById('noteForm');
   const noteTitle = document.getElementById('noteTitle');
   const noteContent = document.getElementById('noteContent');
@@ -35,12 +49,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const fileInput = document.getElementById('fileInput');
   const feed = document.getElementById('feed');
 
-  // Load saved notes when application starts
   loadNotes();
 
-  // Handle post submission
   noteForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    if (isUserBanned(userSession.username)) {
+      alert('You cannot post because your account is suspended.');
+      return;
+    }
 
     const imageData = imageInput.files[0] ? await readFileAsBase64(imageInput.files[0]) : null;
     const fileData = fileInput.files[0] ? {
@@ -50,8 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const newNote = {
       id: Date.now(),
-      authorName: userSession.username, // Save who posted it
-      authorRole: userSession.role,     // Save their role
+      authorName: userSession.username,
+      authorRole: userSession.role,
       title: noteTitle.value,
       content: noteContent.value,
       image: imageData,
@@ -85,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('demo_notes_v2', JSON.stringify(notes));
   }
 
-  // Render notes with Role identification
   function loadNotes() {
     const notes = getNotes();
     feed.innerHTML = '';
@@ -101,7 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
     notes.forEach(note => {
       const noteElement = document.createElement('div');
       
-      // Different border color for Professor vs Student
       const isNoteFromProf = note.authorRole === 'PROFESSOR';
       const borderClass = isNoteFromProf ? 'border-purple-500' : 'border-blue-500';
       const badgeHTML = isNoteFromProf 
@@ -121,14 +136,18 @@ document.addEventListener('DOMContentLoaded', () => {
            </div>` 
         : '';
 
-      // Only show delete button if current user is the author (or if they are admin, but let's stick to author for now)
+      const displayAuthor = note.authorName ? escapeHTML(note.authorName) : "Anonymous";
       const isAuthor = userSession.username === note.authorName;
-      const deleteBtnHTML = isAuthor 
-        ? `<button onclick="deleteNote(${note.id})" class="text-red-400 hover:text-red-600 text-sm font-medium">Delete</button>` 
+      
+      const canDelete = isAuthor || isProf;
+      const deleteBtnHTML = canDelete 
+        ? `<button onclick="deleteNote(${note.id})" class="text-red-500 hover:text-red-700 text-xs font-bold bg-red-50 px-2 py-1 rounded border border-red-200 transition">🗑️ Delete</button>` 
         : '';
 
-      // Set fallback name for older notes that didn't have authorName saved
-      const displayAuthor = note.authorName ? escapeHTML(note.authorName) : "Anonymous";
+      const canBanAuthor = isProf && !isNoteFromProf;
+      const banBtnHTML = canBanAuthor
+        ? `<button onclick="banUser('${escapeHTML(note.authorName)}')" class="text-xs text-gray-500 hover:text-red-600 underline ml-2 font-medium">🚫 Ban User</button>`
+        : '';
 
       noteElement.innerHTML = `
         <div class="flex justify-between items-start mb-2">
@@ -136,6 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="flex items-center mb-1">
               <span class="font-bold text-sm text-gray-900">${displayAuthor}</span>
               ${note.authorRole ? badgeHTML : ''}
+              ${banBtnHTML}
             </div>
             <h3 class="font-bold text-lg text-gray-800">${escapeHTML(note.title)}</h3>
             <span class="text-xs text-gray-400">${note.date}</span>
@@ -156,10 +176,93 @@ document.addEventListener('DOMContentLoaded', () => {
     );
   }
 
+  // --- GLOBAL MODERATION FUNCTIONS ---
+
   window.deleteNote = function(id) {
-    let notes = getNotes();
-    notes = notes.filter(note => note.id !== id);
-    localStorage.setItem('demo_notes_v2', JSON.stringify(notes));
-    loadNotes();
+    if (confirm('Are you sure you want to delete this post?')) {
+      let notes = getNotes();
+      notes = notes.filter(note => note.id !== id);
+      localStorage.setItem('demo_notes_v2', JSON.stringify(notes));
+      loadNotes();
+    }
   };
+
+  window.banUser = function(usernameToBan) {
+    if (confirm(`Are you sure you want to BAN ${usernameToBan}? They will lose access immediately.`)) {
+      let bannedUsers = JSON.parse(localStorage.getItem('banned_users')) || [];
+      
+      if (!bannedUsers.includes(usernameToBan)) {
+        bannedUsers.push(usernameToBan);
+        localStorage.setItem('banned_users', JSON.stringify(bannedUsers));
+      }
+
+      alert(`User ${usernameToBan} has been banned.`);
+      loadNotes();
+      updateAppealBadge();
+    }
+  };
+
+  // Unban User Function (UC-10: Unban User)[cite: 1]
+  window.unbanUser = function(usernameToUnban) {
+    let bannedUsers = JSON.parse(localStorage.getItem('banned_users')) || [];
+    bannedUsers = bannedUsers.filter(user => user !== usernameToUnban);
+    localStorage.setItem('banned_users', JSON.stringify(bannedUsers));
+
+    // Remove pending appeal
+    let appeals = JSON.parse(localStorage.getItem('ban_appeals')) || [];
+    appeals = appeals.filter(a => a.username !== usernameToUnban);
+    localStorage.setItem('ban_appeals', JSON.stringify(appeals));
+
+    alert(`User ${usernameToUnban} has been successfully UNBANNED.`);
+    openModerationModal();
+    updateAppealBadge();
+  };
+
+  function isUserBanned(username) {
+    const bannedUsers = JSON.parse(localStorage.getItem('banned_users')) || [];
+    return bannedUsers.includes(username);
+  }
+
+  function updateAppealBadge() {
+    const appeals = JSON.parse(localStorage.getItem('ban_appeals')) || [];
+    document.getElementById('appealCount').textContent = appeals.length;
+  }
+
+  function openModerationModal() {
+    const appeals = JSON.parse(localStorage.getItem('ban_appeals')) || [];
+    const bannedUsers = JSON.parse(localStorage.getItem('banned_users')) || [];
+    const container = document.getElementById('appealsList');
+    
+    container.innerHTML = '';
+
+    if (bannedUsers.length === 0) {
+      container.innerHTML = `<p class="text-center text-gray-500 py-4">No banned users currently.</p>`;
+    } else {
+      bannedUsers.forEach(bannedName => {
+        const userAppeal = appeals.find(a => a.username === bannedName);
+        const card = document.createElement('div');
+        card.className = "p-3 border rounded-lg bg-gray-50 space-y-2";
+        
+        card.innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-gray-800">${escapeHTML(bannedName)}</span>
+            <button onclick="unbanUser('${escapeHTML(bannedName)}')" class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded font-bold transition">
+              Unban User
+            </button>
+          </div>
+          <p class="text-xs text-gray-600 bg-white p-2 rounded border italic">
+            ${userAppeal ? `"${escapeHTML(userAppeal.reason)}"` : 'No appeal submitted yet.'}
+          </p>
+          ${userAppeal ? `<span class="text-[10px] text-gray-400 block text-right">${userAppeal.date}</span>` : ''}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    document.getElementById('modModal').classList.remove('hidden');
+  }
+
+  function closeModerationModal() {
+    document.getElementById('modModal').classList.add('hidden');
+  }
 });
