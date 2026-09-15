@@ -3,20 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ClassNotes - Login</title>
+  <title>ClassNotes - Sign In</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 font-sans h-screen flex items-center justify-center">
+<body class="bg-gray-100 font-sans h-screen flex items-center justify-center p-4">
 
-  <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+  <!-- LOGIN BOX -->
+  <div id="loginCard" class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
     <div class="text-center mb-6">
       <h1 class="text-3xl font-bold text-blue-600">ClassNotes</h1>
-      <p class="text-gray-500 text-sm mt-1">Share and discover class materials</p>
+      <p class="text-gray-500 text-sm mt-1">Student Resource & Knowledge Sharing Platform</p>
     </div>
 
     <form id="loginForm" class="space-y-4">
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Select your Role</label>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Select Your Role</label>
         <div class="grid grid-cols-2 gap-3">
           <label class="flex items-center justify-center p-3 border rounded-md cursor-pointer hover:bg-blue-50 border-gray-300 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50">
             <input type="radio" name="userRole" value="STUDENT" checked class="hidden">
@@ -42,15 +43,82 @@
     </form>
   </div>
 
+  <!-- BAN APPEAL CARD (Hidden by default) -->
+  <div id="appealCard" class="hidden bg-white p-8 rounded-lg shadow-md w-full max-w-md border-t-4 border-red-500">
+    <div class="text-center mb-4">
+      <span class="text-4xl">🚫</span>
+      <h2 class="text-2xl font-bold text-red-600 mt-2">Account Banned</h2>
+      <p class="text-gray-600 text-sm mt-1">Your account has been suspended for violating platform rules.</p>
+    </div>
+
+    <form id="appealForm" class="space-y-4">
+      <div>
+        <label for="appealReason" class="block text-sm font-medium text-gray-700 mb-1">Submit Ban Appeal</label>
+        <textarea id="appealReason" rows="4" required placeholder="Explain why your account should be unbanned..."
+          class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-400 text-sm resize-none border-gray-300"></textarea>
+      </div>
+
+      <div class="flex space-x-2">
+        <button type="button" id="backToLoginBtn"
+          class="w-1/2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 rounded-md transition text-sm">
+          Back
+        </button>
+        <button type="submit"
+          class="w-1/2 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-md transition text-sm">
+          Send Appeal
+        </button>
+      </div>
+    </form>
+  </div>
+
   <script>
+    let attemptingUser = '';
+
     document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const username = document.getElementById('username').value;
+      const username = document.getElementById('username').value.trim();
       const role = document.querySelector('input[name="userRole"]:checked').value;
 
-      // Save user session
+      // Check if user is banned
+      const bannedUsers = JSON.parse(localStorage.getItem('banned_users')) || [];
+      if (bannedUsers.includes(username)) {
+        attemptingUser = username;
+        document.getElementById('loginCard').classList.add('hidden');
+        document.getElementById('appealCard').classList.remove('hidden');
+        return;
+      }
+
+      // Successful login
       localStorage.setItem('currentUser', JSON.stringify({ username, role }));
-      window.location.href = 'index.html'; // Redirect to feed
+      window.location.href = 'index.html';
+    });
+
+    document.getElementById('backToLoginBtn').addEventListener('click', () => {
+      document.getElementById('appealCard').classList.add('hidden');
+      document.getElementById('loginCard').classList.remove('hidden');
+    });
+
+    document.getElementById('appealForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const reason = document.getElementById('appealReason').value;
+
+      let appeals = JSON.parse(localStorage.getItem('ban_appeals')) || [];
+      
+      // Avoid duplicate pending appeals
+      appeals = appeals.filter(a => a.username !== attemptingUser);
+      appeals.push({
+        id: Date.now(),
+        username: attemptingUser,
+        reason: reason,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+      });
+
+      localStorage.setItem('ban_appeals', JSON.stringify(appeals));
+      alert('Your appeal has been submitted to the Professor/Admin for review.');
+      
+      document.getElementById('appealForm').reset();
+      document.getElementById('appealCard').classList.add('hidden');
+      document.getElementById('loginCard').classList.remove('hidden');
     });
   </script>
 </body>
