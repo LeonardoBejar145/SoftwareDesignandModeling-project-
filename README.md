@@ -8,6 +8,7 @@
 2. A **working front-end prototype** that implements the core flows described in that documentation, so the design can be demonstrated interactively.
 
 > 🔗 Repository: [SoftwareDesignandModeling-project-](https://github.com/LeonardoBejar145/SoftwareDesignandModeling-project-)
+> 🔗 Video: [Drive](https://drive.google.com/drive/folders/16cn3oMQCSMIufEmWIVI6upUIyTy7Kb8v?usp=sharing)
 
 ---
 
@@ -154,4 +155,4 @@ No installation or build step is required — it's static HTML/JS.
 
 ## Author
 
-Developed by [**LeonardoBejar145**](https://github.com/LeonardoBejar145) as a Software Design and Modeling course project.
+Developed by [**LeonardoBejar145**](https://github.com/LeonardoBejar145) and [**Lucmon113**](https://github.com/Lucmon113) as a Software Design and Modeling course project.
